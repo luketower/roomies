@@ -5,9 +5,7 @@ import (
 	"fmt"
 	bp "github.com/luketower/roomies/billprocessor"
 	a "github.com/mgutz/ansi"
-	//"log"
 	"os"
-	//"os/exec"
 	"strings"
 )
 

@@ -1,4 +1,4 @@
-package main
+package billprocessor
 
 import (
 	"os"
@@ -20,24 +20,24 @@ func TestValid(t *testing.T) {
 	validArgs := []string{"date", "03/2015", "gas", "34.56",
 		"--", "bob", "55", "susan", "45"}
 
-	if !valid(validArgs) {
+	if !Valid(validArgs) {
 		t.Errorf("\nArgs are valid but code says NOT: %q", validArgs)
 	}
 
 	wrongNumOfArgs := []string{"date", "03/2015", "gas", "34.56", "electric",
 		"--", "bob", "55", "susan", "45"}
-	if valid(wrongNumOfArgs) {
+	if Valid(wrongNumOfArgs) {
 		t.Errorf("\nWrong number of args: %q", wrongNumOfArgs)
 	}
 
 	noDateArgs := []string{"03/2015", "gas", "34.56", "electric",
 		"--", "bob", "55", "susan", "45"}
-	if valid(noDateArgs) {
+	if Valid(noDateArgs) {
 		t.Errorf("\nImproper date format in args: %q", noDateArgs)
 	}
 
 	noBillsArgs := []string{"date", "03/2015", "--", "bob", "55", "susan", "45"}
-	if valid(noBillsArgs) {
+	if Valid(noBillsArgs) {
 		t.Errorf("\nNo bills in args: %q", noBillsArgs)
 	}
 }

@@ -141,6 +141,9 @@ func calcShares(args []string, total string, shares map[string]string) {
 
 func calcShare(percent string, total string) string {
 	percentFloat, err := strconv.ParseFloat(percent, 64)
+	if err != nil {
+		log.Fatal("OUCH! ", err)
+	}
 	totalFloat, err := strconv.ParseFloat(total, 64)
 	if err != nil {
 		log.Fatal("OUCH! ", err)

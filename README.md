@@ -11,7 +11,7 @@ There are two ways to run the program.
         roomies month 06/2015 gas 45.34 electric 47.35 rent 1200 -- bob 25 susan 25 steve 25 alice 25
   2. Read in a file of multiple months: `roomies path/to/file.txt`
 
-        // path/to/file.txt
+        // file.txt
 
         month 01/2015 gas 45.34 electric 47.35 rent 1200 -- bob 25 susan 25 steve 25 alice 25
         // You can add a comment by starting a line with '//'
@@ -29,7 +29,6 @@ The argument format is:
 
 ### Issues
 Currently there is no checking on percentages, meaning if your percentages add
-up to more or less than 100%, the program will still calculate. A fix is coming
-soon.
+up to more or less than 100%, the program will still calculate.
 
 I wrote this for personal use and to start learning [golang](golang.org). It's been fun. Any suggestions or nitpicks are welcome.

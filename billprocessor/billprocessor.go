@@ -152,7 +152,7 @@ func calcShare(percent string, total string) string {
 	return strconv.FormatFloat(share, 'f', 2, 64)
 }
 
-func Valid(args []string) bool {
+func HasValid(args []string) bool {
 	hasDate := includeIn(args, "date") || includeIn(args, "month")
 	hasDash := includeIn(args, "--")
 	hasMinimumCount := len(args) >= 9

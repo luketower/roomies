@@ -2,20 +2,24 @@ package main
 
 import (
 	"fmt"
-	bp "github.com/luketower/roomies/billprocessor"
-	br "github.com/luketower/roomies/billsreader"
+	processor "github.com/luketower/roomies/billprocessor"
+	reader "github.com/luketower/roomies/billsreader"
 	"os"
 )
 
 func main() {
 	args := os.Args[1:]
-	if len(args) > 1 {
-		if bp.Valid(args) {
-			fmt.Println(bp.BillReport(args))
+	if processingOneMonth(args) {
+		if processor.HasValid(args) {
+			fmt.Println(processor.BillReport(args))
 		} else {
-			fmt.Println(bp.ErrorMsg(args))
+			fmt.Println(processor.ErrorMsg(args))
 		}
 	} else {
-		br.Run(args)
+		reader.Read(args)
 	}
+}
+
+func processingOneMonth(args []string) bool {
+	return len(args) > 1
 }

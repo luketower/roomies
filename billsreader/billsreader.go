@@ -3,7 +3,7 @@ package billsreader
 import (
 	"bufio"
 	"fmt"
-	bp "github.com/luketower/roomies/billprocessor"
+	processor "github.com/luketower/roomies/billprocessor"
 	a "github.com/mgutz/ansi"
 	"os"
 	"strings"
@@ -19,7 +19,7 @@ func errMsg(args []string) string {
 		a.Color(lineBreak("*", 50), "yellow")
 }
 
-func Run(args []string) {
+func Read(args []string) {
 	if len(args) != 1 {
 		fmt.Printf("%s", errMsg(args))
 		os.Exit(1)
@@ -46,7 +46,7 @@ func readFile(scanner *bufio.Scanner) {
 		if isCommentOrBlankLine(args) {
 			continue
 		}
-		fmt.Println(bp.BillReport(args))
+		fmt.Println(processor.BillReport(args))
 	}
 }
 

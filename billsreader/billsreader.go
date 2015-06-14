@@ -4,19 +4,20 @@ import (
 	"bufio"
 	"fmt"
 	processor "github.com/luketower/roomies/billprocessor"
-	a "github.com/mgutz/ansi"
+	"github.com/luketower/roomies/color"
 	"os"
 	"strings"
 )
 
 func errMsg(args []string) string {
-	return "\n" + a.Color(lineBreak("*", 50), "yellow") +
-		a.Color(lineBreak("*", 50), "yellow") + "\n" +
-		a.Color("There was an error processing your input:\n", "red") +
+	return "\n" +
+		color.Text(lineBreak("*", 50), "yellow") +
+		color.Text(lineBreak("*", 50), "yellow") + "\n" +
+		color.Text("There was an error processing your input:\n", "red") +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
-		a.Color("  Ex. 'readbills <filename>'\n\n", "red") +
-		a.Color(lineBreak("*", 50), "yellow") +
-		a.Color(lineBreak("*", 50), "yellow")
+		color.Text("  Ex. 'readbills <filename>'\n\n", "red") +
+		color.Text(lineBreak("*", 50), "yellow") +
+		color.Text(lineBreak("*", 50), "yellow")
 }
 
 func Read(args []string) {

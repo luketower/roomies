@@ -1,7 +1,7 @@
 package billprocessor
 
 import (
-	a "github.com/mgutz/ansi"
+	"github.com/luketower/roomies/color"
 	"log"
 	"sort"
 	"strconv"
@@ -27,28 +27,28 @@ var (
 
 func ErrorMsg(args []string) string {
 	return "\n" +
-		a.Color(lineBreak("*", 70), "yellow") + "\n" +
-		a.Color(lineBreak("*", 70), "yellow") + "\n\n" +
-		a.Color("There was a problem with your inputs:\n", "red") + "\n" +
+		color.Text(lineBreak("*", 70), "yellow") + "\n" +
+		color.Text(lineBreak("*", 70), "yellow") + "\n\n" +
+		color.Text("There was a problem with your inputs:\n", "red") + "\n" +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
-		a.Color("Input should resemble the following:\n", "red") + "\n" +
+		color.Text("Input should resemble the following:\n", "red") + "\n" +
 		"  'date 12/2015 Gas 34.55 Electric 45.99 Rent 933 -- bob 45 susan 55'\n\n" +
 		"* You must include the date!\n" +
 		"* You must add '--' followed by name/percentage pairs.\n" +
 		"  Ex. '(args) -- bob 45 susan 55'\n\n" +
-		a.Color(lineBreak("*", 70), "yellow") + "\n" +
-		a.Color(lineBreak("*", 70), "yellow") + "\n"
+		color.Text(lineBreak("*", 70), "yellow") + "\n" +
+		color.Text(lineBreak("*", 70), "yellow") + "\n"
 }
 
 func BillReport(args []string) string {
 	bills := map[string]string{}
 	billsMap(args, bills)
-	return a.Color(monthHeader(args), "blue") + "\n" +
-		a.Color(lineBreak("*", 25), "green") + "\n" +
+	return color.Text(monthHeader(args), "blue") + "\n" +
+		color.Text(lineBreak("*", 25), "green") + "\n" +
 		eachBill(bills) +
-		a.Color(lineBreak("-", 25), "green") + "\n" +
+		color.Text(lineBreak("-", 25), "green") + "\n" +
 		billToString("Total", calcTotal(bills)) +
-		a.Color(lineBreak("-", 25), "green") + "\n" +
+		color.Text(lineBreak("-", 25), "green") + "\n" +
 		individualShares(calcTotal(bills), args)
 }
 

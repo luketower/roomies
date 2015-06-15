@@ -43,13 +43,15 @@ func ErrorMsg(args []string) string {
 func BillReport(args []string) string {
 	bills := map[string]string{}
 	billsMap(args, bills)
+	total := total(bills)
+	dottedLine := color.Text(lineBreak("-", 25), "green") + "\n"
 	return color.Text(monthHeader(args), "blue") + "\n" +
 		color.Text(lineBreak("*", 25), "green") + "\n" +
 		eachBill(bills) +
-		color.Text(lineBreak("-", 25), "green") + "\n" +
-		billToString("Total", calcTotal(bills)) +
-		color.Text(lineBreak("-", 25), "green") + "\n" +
-		individualShares(calcTotal(bills), args)
+		dottedLine +
+		billToString("Total", total) +
+		dottedLine +
+		individualShares(total, args)
 }
 
 func lineBreak(char string, num int) string {
@@ -83,9 +85,8 @@ func isMonth(s string, args []string) bool {
 }
 
 func eachBill(bills map[string]string) (allBills string) {
-	names := orderKeys(bills)
-	for _, n := range names {
-		allBills += billToString(strings.Title(n), bills[n])
+	for _, name := range sortedKeys(bills) {
+		allBills += billToString(strings.Title(name), bills[name])
 	}
 	return
 }
@@ -107,7 +108,7 @@ func tabsFor(text string) (tabs string) {
 	return
 }
 
-func calcTotal(bills map[string]string) string {
+func total(bills map[string]string) string {
 	var total float64
 	for _, v := range bills {
 		val, _ := strconv.ParseFloat(v, 64)
@@ -117,26 +118,27 @@ func calcTotal(bills map[string]string) string {
 }
 
 func individualShares(total string, args []string) (totalShares string) {
-	shares := map[string]string{}
-	calcShares(args, total, shares)
-	names := orderKeys(shares)
-	for _, name := range names {
+	shares := shares(args, total)
+	for _, name := range sortedKeys(shares) {
 		billName := strings.Title(name) + "'s Total"
 		totalShares += billToString(billName, shares[name])
 	}
 	return
 }
 
-func calcShares(args []string, total string, shares map[string]string) {
-	stringArgs := strings.Join(args, " ")
-	stringShares := strings.Split(stringArgs, " -- ")[1]
-	sharesArr := strings.Split(stringShares, " ")
+func shares(args []string, total string) map[string]string {
+	var (
+		shares       = map[string]string{}
+		stringArgs   = strings.Join(args, " ")
+		stringShares = strings.Split(stringArgs, " -- ")[1]
+		sharesArr    = strings.Split(stringShares, " ")
+	)
 	for i, s := range sharesArr {
 		if i%2 != 0 {
-			key := sharesArr[i-1]
-			shares[key] = calcShare(s, total)
+			shares[sharesArr[i-1]] = calcShare(s, total)
 		}
 	}
+	return shares
 }
 
 func calcShare(percent string, total string) string {
@@ -165,7 +167,7 @@ func includeIn(args []string, flag string) bool {
 	return strings.Contains(stringArgs, flag)
 }
 
-func orderKeys(m map[string]string) (names []string) {
+func sortedKeys(m map[string]string) (names []string) {
 	for k := range m {
 		names = append(names, k)
 	}

@@ -10,14 +10,13 @@ import (
 )
 
 func errMsg(args []string) string {
+	yellowLines := color.Text(lineBreak("*", 50)+lineBreak("*", 50), "yellow")
 	return "\n" +
-		color.Text(lineBreak("*", 50), "yellow") +
-		color.Text(lineBreak("*", 50), "yellow") + "\n" +
+		yellowLines +
 		color.Text("There was an error processing your input:\n", "red") +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
 		color.Text("  Ex. 'readbills <filename>'\n\n", "red") +
-		color.Text(lineBreak("*", 50), "yellow") +
-		color.Text(lineBreak("*", 50), "yellow")
+		yellowLines
 }
 
 func Read(args []string) {

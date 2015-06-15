@@ -16,28 +16,28 @@ func compareStrings(result, expected, methodName string, t *testing.T) {
 
 // Tests
 
-func TestValid(t *testing.T) {
+func TestHasValid(t *testing.T) {
 	validArgs := []string{"date", "03/2015", "gas", "34.56",
 		"--", "bob", "55", "susan", "45"}
 
-	if !Valid(validArgs) {
+	if !HasValid(validArgs) {
 		t.Errorf("\nArgs are valid but code says NOT: %q", validArgs)
 	}
 
 	wrongNumOfArgs := []string{"date", "03/2015", "gas", "34.56", "electric",
 		"--", "bob", "55", "susan", "45"}
-	if Valid(wrongNumOfArgs) {
+	if HasValid(wrongNumOfArgs) {
 		t.Errorf("\nWrong number of args: %q", wrongNumOfArgs)
 	}
 
 	noDateArgs := []string{"03/2015", "gas", "34.56", "electric",
 		"--", "bob", "55", "susan", "45"}
-	if Valid(noDateArgs) {
+	if HasValid(noDateArgs) {
 		t.Errorf("\nImproper date format in args: %q", noDateArgs)
 	}
 
 	noBillsArgs := []string{"date", "03/2015", "--", "bob", "55", "susan", "45"}
-	if Valid(noBillsArgs) {
+	if HasValid(noBillsArgs) {
 		t.Errorf("\nNo bills in args: %q", noBillsArgs)
 	}
 }

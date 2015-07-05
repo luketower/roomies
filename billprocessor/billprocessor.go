@@ -2,6 +2,7 @@ package billprocessor
 
 import (
 	"github.com/luketower/roomies/color"
+	"github.com/luketower/roomies/linebreak"
 	"log"
 	"sort"
 	"strconv"
@@ -27,8 +28,8 @@ var (
 
 func ErrorMsg(args []string) string {
 	return "\n" +
-		color.Text(lineBreak("*", 70), "yellow") + "\n" +
-		color.Text(lineBreak("*", 70), "yellow") + "\n\n" +
+		linebreak.Make("*", 70, "yellow") + "\n" +
+		linebreak.Make("*", 70, "yellow") + "\n\n" +
 		color.Text("There was a problem with your inputs:\n", "red") + "\n" +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
 		color.Text("Input should resemble the following:\n", "red") + "\n" +
@@ -36,26 +37,22 @@ func ErrorMsg(args []string) string {
 		"* You must include the date!\n" +
 		"* You must add '--' followed by name/percentage pairs.\n" +
 		"  Ex. '(args) -- bob 45 susan 55'\n\n" +
-		color.Text(lineBreak("*", 70), "yellow") + "\n" +
-		color.Text(lineBreak("*", 70), "yellow") + "\n"
+		linebreak.Make("*", 70, "yellow") + "\n" +
+		linebreak.Make("*", 70, "yellow") + "\n"
 }
 
 func BillReport(args []string) string {
 	bills := map[string]string{}
 	billsMap(args, bills)
 	total := total(bills)
-	dottedLine := color.Text(lineBreak("-", 25), "green") + "\n"
+	dottedLine := linebreak.Make("-", 25, "green") + "\n"
 	return color.Text(monthHeader(args), "blue") + "\n" +
-		color.Text(lineBreak("*", 25), "green") + "\n" +
+		linebreak.Make("*", 25, "green") + "\n" +
 		eachBill(bills) +
 		dottedLine +
 		billToString("Total", total) +
 		dottedLine +
 		individualShares(total, args)
-}
-
-func lineBreak(char string, num int) string {
-	return strings.Repeat(char, num)
 }
 
 func monthHeader(args []string) string {

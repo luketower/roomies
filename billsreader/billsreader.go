@@ -5,12 +5,14 @@ import (
 	"fmt"
 	processor "github.com/luketower/roomies/billprocessor"
 	"github.com/luketower/roomies/color"
+	"github.com/luketower/roomies/linebreak"
 	"os"
 	"strings"
 )
 
 func errMsg(args []string) string {
-	yellowLines := color.Text(lineBreak("*", 50)+lineBreak("*", 50), "yellow")
+	yellowLines := linebreak.Make("*", 50, "yellow") +
+		linebreak.Make("*", 50, "yellow")
 	return "\n" +
 		yellowLines +
 		color.Text("There was an error processing your input:\n", "red") +
@@ -34,10 +36,6 @@ func Read(args []string) {
 	reader := bufio.NewReader(file)
 	scanner := bufio.NewScanner(reader)
 	readFile(scanner)
-}
-
-func lineBreak(char string, num int) string {
-	return strings.Repeat(char, num) + "\n"
 }
 
 func readFile(scanner *bufio.Scanner) {

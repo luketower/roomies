@@ -42,10 +42,10 @@ func TestHasValid(t *testing.T) {
 	}
 }
 
-func TestMonthHeader(t *testing.T) {
+func TestHeader(t *testing.T) {
 	args := []string{"date", "03/2015", "gas", "34.56",
 		"--", "bob", "55", "susan", "45"}
-	header := monthHeader(args)
+	header := header(args)
 	expected := "March 2015"
 	if header != expected {
 		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", header, expected, args)
@@ -96,7 +96,7 @@ func TestIncludeIn(t *testing.T) {
 }
 
 func TestOrderKeys(t *testing.T) {
-	result := orderKeys(map[string]string{"bob": "50.00", "andy": "40.00",
+	result := sortedKeys(map[string]string{"bob": "50.00", "andy": "40.00",
 		"alfred": "67.00"})
 	expected := []string{"alfred", "andy", "bob"}
 	for i, name := range result {

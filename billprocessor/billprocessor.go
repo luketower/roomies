@@ -46,7 +46,7 @@ func BillReport(args []string) string {
 	billsMap(args, bills)
 	total := total(bills)
 	dottedLine := linebreak.Make("-", 25, "green") + "\n"
-	return color.Text(monthHeader(args), "blue") + "\n" +
+	return color.Text(header(args), "blue") + "\n" +
 		linebreak.Make("*", 25, "green") + "\n" +
 		eachBill(bills) +
 		dottedLine +
@@ -55,30 +55,52 @@ func BillReport(args []string) string {
 		individualShares(total, args)
 }
 
-func monthHeader(args []string) string {
-	dateArr := strings.Split(args[1], "/")
-	return MONTHS[dateArr[0]] + " " + dateArr[1]
+func header(args []string) (header string) {
+	for i, w := range args {
+		if w == "month" || w == "date" {
+			dateArr := strings.Split(args[i+1], "/")
+			header = MONTHS[dateArr[0]] + " " + dateArr[1]
+		}
+		if w == "header" {
+			header = args[i+1]
+		}
+	}
+	return
 }
 
-func billsMap(args []string, billsMap map[string]string) {
+func billsMap(args []string, bills map[string]string) {
 	for i, s := range args {
 		if s == "--" {
 			break
 		}
-		if isMonth(s, args) {
+		if isHeader(s, i, args) {
 			continue
 		}
 		if i%2 != 0 {
 			key := args[i-1]
-			billsMap[key] = s
+			bills[key] = s
 		}
 	}
 }
 
-func isMonth(s string, args []string) bool {
-	return s == "date" ||
-		s == "month" ||
-		strings.Contains(s, "/") && s == args[1]
+func isHeader(s string, i int, args []string) (ans bool) {
+	if isHeaderName(s) {
+		ans = true
+	}
+	if i > 0 {
+		ans = isHeaderName(args[i-1])
+	}
+	return ans
+}
+
+func hasHeader(args []string) bool {
+	return includeIn(args, "date") ||
+		includeIn(args, "month") ||
+		includeIn(args, "header")
+}
+
+func isHeaderName(s string) bool {
+	return s == "date" || s == "month" || s == "header"
 }
 
 func eachBill(bills map[string]string) (allBills string) {
@@ -152,11 +174,10 @@ func calcShare(percent string, total string) string {
 }
 
 func HasValid(args []string) bool {
-	hasDate := includeIn(args, "date") || includeIn(args, "month")
 	hasDash := includeIn(args, "--")
 	hasMinimumCount := len(args) >= 9
 	isOdd := len(args)%2 != 0
-	return hasDate && hasDash && hasMinimumCount && isOdd
+	return hasHeader(args) && hasDash && hasMinimumCount && isOdd
 }
 
 func includeIn(args []string, flag string) bool {

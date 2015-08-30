@@ -175,7 +175,7 @@ func calcShare(percent string, total string) string {
 
 func HasValid(args []string) bool {
 	hasDash := includeIn(args, "--")
-	hasMinimumCount := len(args) >= 9
+	hasMinimumCount := len(args) >= 7
 	isOdd := len(args)%2 != 0
 	return hasHeader(args) && hasDash && hasMinimumCount && isOdd
 }

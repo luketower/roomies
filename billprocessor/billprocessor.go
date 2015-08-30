@@ -62,7 +62,7 @@ func header(args []string) (header string) {
 			header = MONTHS[dateArr[0]] + " " + dateArr[1]
 		}
 		if w == "header" {
-			header = args[i+1]
+			header = strings.Title(strings.Replace(args[i+1], "-", " ", -1))
 		}
 	}
 	return

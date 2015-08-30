@@ -27,18 +27,22 @@ var (
 )
 
 func ErrorMsg(args []string) string {
+	headerAndFooter := yellowLines()
 	return "\n" +
-		linebreak.Make("*", 70, "yellow") + "\n" +
-		linebreak.Make("*", 70, "yellow") + "\n\n" +
-		color.Text("There was a problem with your inputs:\n", "red") + "\n" +
+		headerAndFooter +
+		color.Text("There was a problem with your inputs:\n\n", "red") +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
-		color.Text("Input should resemble the following:\n", "red") + "\n" +
+		color.Text("Input should resemble the following:\n\n", "red") +
 		"  'date 12/2015 Gas 34.55 Electric 45.99 Rent 933 -- bob 45 susan 55'\n\n" +
 		"* You must include the date!\n" +
 		"* You must add '--' followed by name/percentage pairs.\n" +
 		"  Ex. '(args) -- bob 45 susan 55'\n\n" +
-		linebreak.Make("*", 70, "yellow") + "\n" +
-		linebreak.Make("*", 70, "yellow") + "\n"
+		headerAndFooter
+}
+
+func yellowLines() (lines string) {
+	return linebreak.Make("*", 70, "yellow") + "\n" +
+		linebreak.Make("*", 70, "yellow") + "\n\n"
 }
 
 func BillReport(args []string) string {

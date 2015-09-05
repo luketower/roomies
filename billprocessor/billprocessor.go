@@ -117,7 +117,9 @@ func billToString(name, amount string) string {
 	if err != nil {
 		log.Fatal("OUCH! ", err)
 	}
-	return name + ":" + tabsFor(name) +
+	return strings.Title(strings.Replace(name, "-", " ", -1)) +
+		":" +
+		tabsFor(name) +
 		strconv.FormatFloat(floatAmount, 'f', 2, 64) + "\n"
 }
 

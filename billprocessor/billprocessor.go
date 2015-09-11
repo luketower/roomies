@@ -47,9 +47,13 @@ func BillReport(args []string) string {
 	bills := map[string]string{}
 	billsMap(args, bills)
 	total := total(bills)
-	dottedLine := linebreak.Make("-", 25, "green") + "\n"
+	lineBreakLength := 25
+	if headerLength := len(header(args)); headerLength > 25 {
+		lineBreakLength = headerLength
+	}
+	dottedLine := linebreak.Make("-", lineBreakLength, "green") + "\n"
 	return color.Text(header(args), "blue") + "\n" +
-		linebreak.Make("*", 25, "green") + "\n" +
+		linebreak.Make("*", lineBreakLength, "green") + "\n" +
 		eachBill(bills) +
 		dottedLine +
 		billToString("Total", total) +

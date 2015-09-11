@@ -129,7 +129,7 @@ func billToString(name, amount string) string {
 
 func tabsFor(text string) (tabs string) {
 	tabs = "\t$"
-	if len(text) <= 5 {
+	if len(text) <= 6 {
 		tabs = "\t" + tabs
 	}
 	return
@@ -147,10 +147,16 @@ func total(bills map[string]string) string {
 func individualShares(total string, args []string) (totalShares string) {
 	shares := shares(args, total)
 	for _, name := range sortedKeys(shares) {
-		billName := strings.Title(name) + "'s Total"
-		totalShares += billToString(billName, shares[name])
+		billName := name + " Total"
+		totalShares += possessive(billToString(billName, shares[name]))
 	}
 	return
+}
+
+func possessive(shares string) string {
+	arr := strings.Split(shares, " ")
+	first, rest := arr[0]+"'s", arr[1:]
+	return strings.Join(append([]string{first}, rest...), " ")
 }
 
 func shares(args []string, total string) map[string]string {

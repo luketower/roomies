@@ -162,7 +162,7 @@ func billToString(name, amount string, i int) string {
 		log.Fatal("OUCH! ", err)
 	}
 	return strings.Title(strings.Replace(modName, "-", " ", -1)) +
-		"   $" +
+		" $" +
 		strconv.FormatFloat(floatAmount, 'f', 2, 64) + "\n"
 }
 

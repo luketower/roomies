@@ -43,30 +43,26 @@ func yellowLines() (lines string) {
 		linebreak.Make("*", 70, "yellow") + "\n\n"
 }
 
-type stringify func(name, amount string, length int) string
+type stringify func(name string) string
 
-func billStringifier(name string, amount string, length int) string {
-	return billToString(strings.Title(name), amount, length)
-}
-func shareStringifier(name string, amount string, length int) string {
-	return billToString(possessive(strings.Title(name))+" Total", amount, length)
-}
+func titleize(name string) string       { return strings.Title(name) }
+func titleizeAndOwn(name string) string { return owner(strings.Title(name)) + " Total" }
 
 func BillReport(args []string) string {
 	bills := map[string]string{}
 	billsToMap(args, bills)
 	total := total(bills)
 	shares := sharesToMap(args, total)
-	longestBillTitle := longestTitleIn(bills, shares)
-	billsArr := eachToArr(bills, longestBillTitle, billStringifier)
-	sharesArr := eachToArr(shares, longestBillTitle-2, shareStringifier)
+	longestTitle := longestTitleIn(bills, shares)
+	billsArr := eachToArr(bills, longestTitle, titleize)
+	sharesArr := eachToArr(shares, longestTitle, titleizeAndOwn)
 	l := lineBreakLength([]int{len(header(args)), longestIn(sharesArr), longestIn(billsArr)})
 	dottedLine := linebreak.Make("-", l, "green") + "\n"
 	return color.Text(header(args), "blue") + "\n" +
 		linebreak.Make("*", l, "green") + "\n" +
 		strings.Join(billsArr, "") +
 		dottedLine +
-		billToString("Total", total, longestBillTitle) +
+		billToString("Total", total, longestTitle) +
 		dottedLine +
 		strings.Join(sharesArr, "")
 }
@@ -111,7 +107,7 @@ func header(args []string) (header string) {
 			header = MONTHS[dateArr[0]] + " " + dateArr[1]
 		}
 		if w == "header" {
-			header = strings.Title(strings.Replace(args[i+1], "-", " ", -1))
+			header = titleize(strings.Replace(args[i+1], "-", " ", -1))
 		}
 	}
 	return
@@ -154,7 +150,7 @@ func isHeaderName(s string) bool {
 
 func eachToArr(m map[string]string, l int, fn stringify) (arr []string) {
 	for _, name := range sortedKeys(m) {
-		arr = append(arr, fn(name, m[name], l))
+		arr = append(arr, billToString(fn(name), m[name], l))
 	}
 	return
 }
@@ -184,7 +180,7 @@ func total(bills map[string]string) string {
 	return strconv.FormatFloat(total, 'f', 2, 64)
 }
 
-func possessive(shares string) string {
+func owner(shares string) string {
 	arr := strings.Split(shares, " ")
 	first, rest := arr[0]+"'s", arr[1:]
 	return strings.Join(append([]string{first}, rest...), " ")

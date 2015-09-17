@@ -49,7 +49,7 @@ func billStringifier(name string, amount string, length int) string {
 	return billToString(strings.Title(name), amount, length)
 }
 func shareStringifier(name string, amount string, length int) string {
-	return possessive(billToString(name+" Total", amount, length))
+	return billToString(possessive(strings.Title(name))+" Total", amount, length)
 }
 
 func BillReport(args []string) string {
@@ -170,7 +170,7 @@ func billToString(name, amount string, i int) string {
 	if err != nil {
 		log.Fatal("OUCH! ", err)
 	}
-	return strings.Title(strings.Replace(adjustedName, "-", " ", -1)) +
+	return strings.Replace(adjustedName, "-", " ", -1) +
 		" $" +
 		strconv.FormatFloat(floatAmount, 'f', 2, 64) + "\n"
 }

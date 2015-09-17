@@ -52,12 +52,12 @@ func TestHeader(t *testing.T) {
 	}
 }
 
-func TestBillsMap(t *testing.T) {
+func TestBillsToMap(t *testing.T) {
 	os.Args = []string{"gobills", "date", "03/2015", "gas", "34.56",
 		"--", "bob", "55", "susan", "45"}
 	args := os.Args[1:]
 	b := map[string]string{}
-	billsMap(args, b)
+	billsToMap(args, b)
 	expected := map[string]string{"gas": "34.56"}
 
 	if b["gas"] != expected["gas"] {
@@ -67,18 +67,23 @@ func TestBillsMap(t *testing.T) {
 
 func TestBillToString(t *testing.T) {
 	name, amount := "Gas", "45.67"
-	result := billToString(name, amount)
-	expected := "Gas:\t\t$45.67\n"
-	compareStrings(result, expected, "billToString(name, amount)", t)
+	result := billToString(name, amount, 0)
+	//	result2 := billToString(name, amount, 5)
+	expected := "Gas: $45.67\n"
+	//	expected2 := "Gas:      $45.67\n"
+	compareStrings(result, expected, "billToString(name, amount, 0)", t)
+	//	compareStrings(result2, expected2, "billToString(name, amount, 5)", t)
 }
 
-func TestIndividualShares(t *testing.T) {
+func TestSharesToMap(t *testing.T) {
 	total := "1000"
 	args := []string{"date", "03/2015", "gas", "34.56",
 		"--", "bob", "45", "susan", "55"}
-	result := individualShares(total, args)
-	expected := "Bob's Total:\t$450.00\nSusan's Total:\t$550.00\n"
-	compareStrings(result, expected, "individualShares(total, args)", t)
+	result := sharesToMap(args, total)
+	expected := "450.00"
+	if result["bob"] != expected {
+		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", result, expected, args)
+	}
 }
 
 func TestCalcShare(t *testing.T) {
@@ -87,15 +92,7 @@ func TestCalcShare(t *testing.T) {
 	compareStrings(result, expected, "calcShare(\"55\", \"1000\"", t)
 }
 
-func TestIncludeIn(t *testing.T) {
-	args := []string{"date", "03/2015", "gas", "34.56", "--",
-		"bob", "55", "Susan", "45"}
-	if includeIn(args, "--") != true {
-		t.Errorf("\nGot: false\nExpected: true\nargs = %q", args)
-	}
-}
-
-func TestOrderKeys(t *testing.T) {
+func TestSortedKeys(t *testing.T) {
 	result := sortedKeys(map[string]string{"bob": "50.00", "andy": "40.00",
 		"alfred": "67.00"})
 	expected := []string{"alfred", "andy", "bob"}

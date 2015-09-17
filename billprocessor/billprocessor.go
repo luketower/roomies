@@ -39,8 +39,8 @@ func ErrorMsg(args []string) string {
 }
 
 func yellowLines() (lines string) {
-	return linebreak.Make("*", 70, "yellow") + "\n" +
-		linebreak.Make("*", 70, "yellow") + "\n\n"
+	line := linebreak.Make("*", 70, "yellow")
+	return line + "\n" + line + "\n\n"
 }
 
 type stringify func(name string) string
@@ -138,12 +138,6 @@ func isHeader(s string, i int, args []string) (ans bool) {
 	return ans
 }
 
-func hasHeader(args []string) bool {
-	return includeIn(args, "date") ||
-		includeIn(args, "month") ||
-		includeIn(args, "header")
-}
-
 func isHeaderName(s string) bool {
 	return s == "date" || s == "month" || s == "header"
 }
@@ -215,15 +209,22 @@ func calcShare(percent string, total string) string {
 }
 
 func HasValid(args []string) bool {
-	hasDash := includeIn(args, "--")
-	hasMinimumCount := len(args) >= 7
-	isOdd := len(args)%2 != 0
-	return hasHeader(args) && hasDash && hasMinimumCount && isOdd
+	stringArgs := strings.Join(args, " ")
+	return hasHeader(stringArgs) &&
+		strings.Contains(stringArgs, "--") &&
+		len(args) >= 7 &&
+		len(args)%2 != 0 &&
+		hasBills(stringArgs)
 }
 
-func includeIn(args []string, flag string) bool {
-	stringArgs := strings.Join(args, " ")
-	return strings.Contains(stringArgs, flag)
+func hasHeader(args string) bool {
+	return strings.Contains(args, "date") ||
+		strings.Contains(args, "month") ||
+		strings.Contains(args, "header")
+}
+
+func hasBills(args string) bool {
+	return len(strings.Split(strings.Split(args, " -- ")[0], " ")) > 2
 }
 
 func sortedKeys(m map[string]string) (names []string) {

@@ -100,6 +100,15 @@ func (fields Fields) toArr(l int) (arr []string, longest int) {
 	return arr, longest
 }
 
+func (fields Fields) total() string {
+	var total float64
+	for _, f := range fields {
+		val, _ := strconv.ParseFloat(f.amount, 64)
+		total += val
+	}
+	return strconv.FormatFloat(total, 'f', 2, 64)
+}
+
 func (slice Fields) Len() int {
 	return len(slice)
 }
@@ -137,7 +146,7 @@ func parse(args []string) (bills Fields, shares Fields, header string, total Fie
 		}
 		if arg == "--" {
 			isShare = true
-			total = Field{"Total", getTotal(bills), false}
+			total = Field{"Total", bills.total(), false}
 			continue
 		}
 		if i%2 != 0 {
@@ -195,15 +204,6 @@ func isHeaderName(s string) bool {
 
 func isDate(s string) bool {
 	return s == "date" || s == "month"
-}
-
-func getTotal(bills Fields) string {
-	var total float64
-	for _, bill := range bills {
-		val, _ := strconv.ParseFloat(bill.amount, 64)
-		total += val
-	}
-	return strconv.FormatFloat(total, 'f', 2, 64)
 }
 
 func calcShare(percent string, total string) string {

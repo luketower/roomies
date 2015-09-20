@@ -25,9 +25,9 @@ var MONTHS = map[string]string{
 }
 
 func ErrorMsg(args []string) string {
-	headerAndFooter := yellowLines()
+	yellowLineBreak := linebreak.Make("*", 70, "yellow")
 	return "\n" +
-		headerAndFooter +
+		yellowLineBreak + "\n" + yellowLineBreak + "\n\n" +
 		color.Text("There was a problem with your inputs:\n\n", "red") +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
 		color.Text("Input should resemble the following:\n\n", "red") +
@@ -35,57 +35,127 @@ func ErrorMsg(args []string) string {
 		"* You must include the date!\n" +
 		"* You must add '--' followed by name/percentage pairs.\n" +
 		"  Ex. '(args) -- bob 45 susan 55'\n\n" +
-		headerAndFooter
+		yellowLineBreak + "\n" + yellowLineBreak + "\n\n"
 }
 
-func yellowLines() (lines string) {
-	line := linebreak.Make("*", 70, "yellow")
-	return line + "\n" + line + "\n\n"
+type Field struct {
+	name    string
+	amount  string
+	isShare bool
 }
 
-type stringify func(name string) string
-
-func titleize(name string) string       { return strings.Title(name) }
-func titleizeAndOwn(name string) string { return owner(strings.Title(name)) + " Total" }
-
-func BillReport(args []string) string {
-	bills := map[string]string{}
-	billsToMap(args, bills)
-	total := total(bills)
-	shares := sharesToMap(args, total)
-	longestTitle := longestTitleIn(bills, shares)
-	billsArr := eachToArr(bills, longestTitle, titleize)
-	sharesArr := eachToArr(shares, longestTitle, titleizeAndOwn)
-	l := lineBreakLength([]int{len(header(args)), longestIn(sharesArr), longestIn(billsArr)})
-	dottedLine := linebreak.Make("-", l, "green") + "\n"
-	return color.Text(header(args), "blue") + "\n" +
-		linebreak.Make("*", l, "green") + "\n" +
-		strings.Join(billsArr, "") +
-		dottedLine +
-		billToString("Total", total, longestTitle) +
-		dottedLine +
-		strings.Join(sharesArr, "")
-}
-
-func longestTitleIn(bills map[string]string, shares map[string]string) (l int) {
-	for k := range bills {
-		if length := len(k); length > l {
-			l = length
-		}
+func (f *Field) toString(length int) (s string) {
+	name := f.formattedName()
+	if len(name) < length {
+		s = name + ":" + strings.Repeat(" ", length-len(name))
+	} else {
+		s = name + ":"
 	}
-	for k := range shares {
-		if length := len(k) + 8; length > l {
+	floatAmount, err := strconv.ParseFloat(f.amount, 64)
+	if err != nil {
+		log.Fatal("OUCH! ", err)
+	}
+	return s + " $" + strconv.FormatFloat(floatAmount, 'f', 2, 64) + "\n"
+}
+
+func (f *Field) formattedName() (s string) {
+	s = strings.Title(f.name)
+	if f.isShare {
+		arr := strings.Split(s, " ")
+		first, rest := arr[0]+"'s", arr[1:]
+		s = strings.Join(append([]string{first}, rest...), " ")
+	}
+	return strings.Replace(s, "-", " ", -1)
+}
+
+func (f *Field) nameLength() (l int) {
+	if f.isShare {
+		l = len(f.name) + 2
+	} else {
+		l = len(f.name)
+	}
+	return
+}
+
+type Fields []Field
+
+func (fields Fields) longestTitle() (l int) {
+	for _, b := range fields {
+		if length := b.nameLength(); length > l {
 			l = length
 		}
 	}
 	return
 }
 
-func longestIn(arr []string) (l int) {
-	for _, str := range arr {
-		if strLength := len(str); strLength > l {
-			l = strLength
+func (fields Fields) toArr(l int) (arr []string, longest int) {
+	sort.Sort(fields)
+	for _, f := range fields {
+		str := f.toString(l)
+		arr = append(arr, str)
+		if length := len(str); length > longest {
+			longest = length
 		}
+	}
+	return arr, longest
+}
+
+func (slice Fields) Len() int {
+	return len(slice)
+}
+
+func (slice Fields) Less(i, j int) bool {
+	return slice[i].name < slice[j].name
+}
+
+func (slice Fields) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
+
+func BillReport(args []string) string {
+	bills, shares, header, total := parse(args)
+	longestTitle := longestTitleIn(bills, shares)
+	billsArr, longestBill := bills.toArr(longestTitle)
+	sharesArr, longestShare := shares.toArr(longestTitle)
+	length := lineBreakLength([]int{len(header), longestBill, longestShare})
+	dottedLine := linebreak.Make("-", length, "green") + "\n"
+	return color.Text(header, "blue") + "\n" +
+		linebreak.Make("*", length, "green") + "\n" +
+		strings.Join(billsArr, "") +
+		dottedLine +
+		total.toString(longestTitle) +
+		dottedLine +
+		strings.Join(sharesArr, "")
+}
+
+func parse(args []string) (bills Fields, shares Fields, header string, total Field) {
+	isShare := false
+	for i, arg := range args {
+		if isHeader(arg, i, args) {
+			header = makeHeader(arg, args, i)
+			continue
+		}
+		if arg == "--" {
+			isShare = true
+			total = Field{"Total", getTotal(bills), false}
+			continue
+		}
+		if i%2 != 0 {
+			if isShare {
+				shares = append(shares, Field{arg + " Total", calcShare(args[i+1], total.amount), isShare})
+			} else {
+				bills = append(bills, Field{args[i-1], arg, isShare})
+			}
+		}
+	}
+	return
+}
+
+func longestTitleIn(bills Fields, shares Fields) (l int) {
+	if shares.longestTitle() > bills.longestTitle() {
+		l = shares.longestTitle()
+	} else {
+		l = bills.longestTitle()
 	}
 	return
 }
@@ -100,38 +170,19 @@ func lineBreakLength(allLengths []int) (l int) {
 	return
 }
 
-func header(args []string) (header string) {
-	for i, w := range args {
-		if w == "month" || w == "date" {
-			dateArr := strings.Split(args[i+1], "/")
-			header = MONTHS[dateArr[0]] + " " + dateArr[1]
-		}
-		if w == "header" {
-			header = titleize(strings.Replace(args[i+1], "-", " ", -1))
-		}
+func makeHeader(word string, args []string, i int) (header string) {
+	if strings.Contains(word, "/") && isDate(args[i-1]) {
+		dateArr := strings.Split(word, "/")
+		header = MONTHS[dateArr[0]] + " " + dateArr[1]
+	} else {
+		header = strings.Title(strings.Replace(word, "-", " ", -1))
 	}
-	return
-}
 
-func billsToMap(args []string, bills map[string]string) {
-	for i, s := range args {
-		if s == "--" {
-			break
-		}
-		if isHeader(s, i, args) {
-			continue
-		}
-		if i%2 != 0 {
-			key := args[i-1]
-			bills[key] = s
-		}
-	}
+	return header
 }
 
 func isHeader(s string, i int, args []string) (ans bool) {
-	if isHeaderName(s) {
-		ans = true
-	}
+	ans = isHeaderName(s)
 	if i > 0 {
 		ans = isHeaderName(args[i-1])
 	}
@@ -139,70 +190,30 @@ func isHeader(s string, i int, args []string) (ans bool) {
 }
 
 func isHeaderName(s string) bool {
-	return s == "date" || s == "month" || s == "header"
+	return isDate(s) || s == "header"
 }
 
-func eachToArr(m map[string]string, l int, fn stringify) (arr []string) {
-	for _, name := range sortedKeys(m) {
-		arr = append(arr, billToString(fn(name), m[name], l))
-	}
-	return
+func isDate(s string) bool {
+	return s == "date" || s == "month"
 }
 
-func billToString(name, amount string, i int) string {
-	var adjustedName string
-	if len(name) < i {
-		adjustedName = name + ":" + strings.Repeat(" ", i-len(name))
-	} else {
-		adjustedName = name + ":"
-	}
-	floatAmount, err := strconv.ParseFloat(amount, 64)
-	if err != nil {
-		log.Fatal("OUCH! ", err)
-	}
-	return strings.Replace(adjustedName, "-", " ", -1) +
-		" $" +
-		strconv.FormatFloat(floatAmount, 'f', 2, 64) + "\n"
-}
-
-func total(bills map[string]string) string {
+func getTotal(bills Fields) string {
 	var total float64
-	for _, v := range bills {
-		val, _ := strconv.ParseFloat(v, 64)
+	for _, bill := range bills {
+		val, _ := strconv.ParseFloat(bill.amount, 64)
 		total += val
 	}
 	return strconv.FormatFloat(total, 'f', 2, 64)
 }
 
-func owner(shares string) string {
-	arr := strings.Split(shares, " ")
-	first, rest := arr[0]+"'s", arr[1:]
-	return strings.Join(append([]string{first}, rest...), " ")
-}
-
-func sharesToMap(args []string, total string) map[string]string {
-	var (
-		shares       = map[string]string{}
-		stringArgs   = strings.Join(args, " ")
-		stringShares = strings.Split(stringArgs, " -- ")[1]
-		sharesArr    = strings.Split(stringShares, " ")
-	)
-	for i, s := range sharesArr {
-		if i%2 != 0 {
-			shares[sharesArr[i-1]] = calcShare(s, total)
-		}
-	}
-	return shares
-}
-
 func calcShare(percent string, total string) string {
 	percentFloat, err := strconv.ParseFloat(percent, 64)
 	if err != nil {
-		log.Fatal("OUCH! ", err)
+		log.Fatal("OUCH! Can't parse percent! ", err)
 	}
 	totalFloat, err := strconv.ParseFloat(total, 64)
 	if err != nil {
-		log.Fatal("OUCH! ", err)
+		log.Fatal("OUCH! Can't parse total! ", err)
 	}
 	share := totalFloat * (percentFloat / 100.00)
 	return strconv.FormatFloat(share, 'f', 2, 64)
@@ -225,12 +236,4 @@ func hasHeader(args string) bool {
 
 func hasBills(args string) bool {
 	return len(strings.Split(strings.Split(args, " -- ")[0], " ")) > 2
-}
-
-func sortedKeys(m map[string]string) (names []string) {
-	for k := range m {
-		names = append(names, k)
-	}
-	sort.Strings(names)
-	return
 }

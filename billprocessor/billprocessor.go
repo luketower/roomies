@@ -45,9 +45,9 @@ type Field struct {
 }
 
 func (f *Field) toString(length int) (s string) {
-	name := f.formattedName()
-	if len(name) < length {
-		s = name + ":" + strings.Repeat(" ", length-len(name))
+	name := f.formatName()
+	if nameLength := len(name); nameLength < length {
+		s = name + ":" + strings.Repeat(" ", length-nameLength)
 	} else {
 		s = name + ":"
 	}
@@ -58,7 +58,7 @@ func (f *Field) toString(length int) (s string) {
 	return s + " $" + strconv.FormatFloat(floatAmount, 'f', 2, 64) + "\n"
 }
 
-func (f *Field) formattedName() (s string) {
+func (f *Field) formatName() (s string) {
 	s = strings.Title(f.name)
 	if f.isShare {
 		arr := strings.Split(s, " ")
@@ -68,20 +68,11 @@ func (f *Field) formattedName() (s string) {
 	return strings.Replace(s, "-", " ", -1)
 }
 
-func (f *Field) nameLength() (l int) {
-	if f.isShare {
-		l = len(f.name) + 2
-	} else {
-		l = len(f.name)
-	}
-	return
-}
-
 type Fields []Field
 
 func (fields Fields) longestTitle() (l int) {
 	for _, b := range fields {
-		if length := b.nameLength(); length > l {
+		if length := len(b.formatName()); length > l {
 			l = length
 		}
 	}

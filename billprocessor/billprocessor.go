@@ -191,15 +191,11 @@ func makeHeader(word string, args []string, i int) (header string) {
 }
 
 func isHeader(s string, i int, args []string) (ans bool) {
-	ans = isHeaderName(s)
+	ans = hasHeader(s)
 	if i > 0 {
-		ans = isHeaderName(args[i-1])
+		ans = hasHeader(args[i-1])
 	}
 	return ans
-}
-
-func isHeaderName(s string) bool {
-	return isDate(s) || s == "header"
 }
 
 func isDate(s string) bool {

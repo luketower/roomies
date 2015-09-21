@@ -31,7 +31,7 @@ func ErrorMsg(args []string) string {
 		color.Text("There was a problem with your inputs:\n\n", "red") +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
 		color.Text("Input should resemble the following:\n\n", "red") +
-		"  'date 12/2015 Gas 34.55 Electric 45.99 Rent 933 -- bob 45 susan 55'\n\n" +
+		"  'date 12/2015 gas 34.55 electric 45.99 rent 933 -- bob 45 susan 55'\n\n" +
 		"* You must include the date!\n" +
 		"* You must add '--' followed by name/percentage pairs.\n" +
 		"  Ex. '(args) -- bob 45 susan 55'\n\n" +
@@ -51,11 +51,7 @@ func (f *Field) toString(length int) (s string) {
 	} else {
 		s = name + ":"
 	}
-	floatAmount, err := strconv.ParseFloat(f.amount, 64)
-	if err != nil {
-		log.Fatal("OUCH! ", err)
-	}
-	return s + " $" + strconv.FormatFloat(floatAmount, 'f', 2, 64) + "\n"
+	return s + " $" + f.amount + "\n"
 }
 
 func (f *Field) formatName() (s string) {
@@ -94,7 +90,7 @@ func (fields Fields) toArr(l int) (arr []string, longest int) {
 func (fields Fields) total() string {
 	var total float64
 	for _, f := range fields {
-		val, _ := strconv.ParseFloat(f.amount, 64)
+		val := parseFloat(f.amount)
 		total += val
 	}
 	return strconv.FormatFloat(total, 'f', 2, 64)
@@ -131,7 +127,7 @@ func BillReport(args []string) string {
 func parse(args []string) (bills Fields, shares Fields, header string, total Field) {
 	isShare := false
 	for i, arg := range args {
-		if isHeader(arg, i, args) {
+		if isPartOfHeader(arg, i, args) {
 			header = makeHeader(arg, args, i)
 			continue
 		}
@@ -142,9 +138,11 @@ func parse(args []string) (bills Fields, shares Fields, header string, total Fie
 		}
 		if i%2 != 0 {
 			if isShare {
-				shares = append(shares, Field{arg + " Total", calcShare(args[i+1], total.amount), isShare})
+				shares = append(shares, Field{arg + " Total",
+					calcShare(args[i+1], total.amount), isShare})
 			} else {
-				bills = append(bills, Field{args[i-1], arg, isShare})
+				bills = append(bills, Field{args[i-1],
+					calcShare("100", arg), isShare})
 			}
 		}
 	}
@@ -181,7 +179,7 @@ func makeHeader(word string, args []string, i int) (header string) {
 	return header
 }
 
-func isHeader(s string, i int, args []string) (ans bool) {
+func isPartOfHeader(s string, i int, args []string) (ans bool) {
 	ans = hasHeader(s)
 	if i > 0 {
 		ans = hasHeader(args[i-1])
@@ -193,17 +191,20 @@ func isDate(s string) bool {
 	return s == "date" || s == "month"
 }
 
-func calcShare(percent string, total string) string {
-	percentFloat, err := strconv.ParseFloat(percent, 64)
-	if err != nil {
-		log.Fatal("OUCH! Can't parse percent! ", err)
+func calcShare(percent string, total string) (calc string) {
+	s := parseFloat(total)
+	if percent != "100" {
+		s = s * (parseFloat(percent) / 100.00)
 	}
-	totalFloat, err := strconv.ParseFloat(total, 64)
+	return strconv.FormatFloat(s, 'f', 2, 64)
+}
+
+func parseFloat(num string) (float float64) {
+	float, err := strconv.ParseFloat(num, 64)
 	if err != nil {
-		log.Fatal("OUCH! Can't parse total! ", err)
+		log.Fatal("OUCH! ", err)
 	}
-	share := totalFloat * (percentFloat / 100.00)
-	return strconv.FormatFloat(share, 'f', 2, 64)
+	return
 }
 
 func HasValid(args []string) bool {

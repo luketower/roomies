@@ -126,7 +126,7 @@ func BillReport(args []string) string {
 		sharesStr
 }
 
-func parse(args []string) (bills Fields, shares Fields, longestTitle int, header string, total Field) {
+func parse(args []string) (bills, shares Fields, longestTitle int, header string, total Field) {
 	isShare := false
 	for i, arg := range args {
 		if isPartOfHeader(arg, i, args) {
@@ -152,12 +152,11 @@ func parse(args []string) (bills Fields, shares Fields, longestTitle int, header
 	return
 }
 
-func lineBreakLength(allLengths []int) (l int) {
-	l = DEFAULT_LINE_BREAK_LENGTH
-	for _, num := range allLengths {
-		if num > l {
-			l = num
-		}
+func lineBreakLength(lengths []int) (l int) {
+	sort.Ints(lengths)
+	l, highest := DEFAULT_LINE_BREAK_LENGTH, lengths[len(lengths)-1]
+	if highest > l {
+		l = highest
 	}
 	return
 }

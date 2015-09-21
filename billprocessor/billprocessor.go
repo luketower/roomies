@@ -9,20 +9,23 @@ import (
 	"strings"
 )
 
-var MONTHS = map[string]string{
-	"01": "January",
-	"02": "February",
-	"03": "March",
-	"04": "April",
-	"05": "May",
-	"06": "June",
-	"07": "July",
-	"08": "August",
-	"09": "September",
-	"10": "October",
-	"11": "November",
-	"12": "December",
-}
+var (
+	DEFAULT_LINE_BREAK_LENGTH = 25
+	MONTHS                    = map[string]string{
+		"01": "January",
+		"02": "February",
+		"03": "March",
+		"04": "April",
+		"05": "May",
+		"06": "June",
+		"07": "July",
+		"08": "August",
+		"09": "September",
+		"10": "October",
+		"11": "November",
+		"12": "December",
+	}
+)
 
 func ErrorMsg(args []string) string {
 	yellowLineBreak := linebreak.Make("*", 70, "yellow")
@@ -96,16 +99,16 @@ func (fields Fields) total() string {
 	return strconv.FormatFloat(total, 'f', 2, 64)
 }
 
-func (slice Fields) Len() int {
-	return len(slice)
+func (fields Fields) Len() int {
+	return len(fields)
 }
 
-func (slice Fields) Less(i, j int) bool {
-	return slice[i].name < slice[j].name
+func (fields Fields) Less(i, j int) bool {
+	return fields[i].name < fields[j].name
 }
 
-func (slice Fields) Swap(i, j int) {
-	slice[i], slice[j] = slice[j], slice[i]
+func (fields Fields) Swap(i, j int) {
+	fields[i], fields[j] = fields[j], fields[i]
 }
 
 func BillReport(args []string) string {
@@ -159,7 +162,7 @@ func longestTitleIn(bills Fields, shares Fields) (l int) {
 }
 
 func lineBreakLength(allLengths []int) (l int) {
-	l = 25
+	l = DEFAULT_LINE_BREAK_LENGTH
 	for _, num := range allLengths {
 		if num > l {
 			l = num
@@ -176,7 +179,7 @@ func makeHeader(word string, args []string, i int) (header string) {
 		header = strings.Title(strings.Replace(word, "-", " ", -1))
 	}
 
-	return header
+	return
 }
 
 func isPartOfHeader(s string, i int, args []string) (ans bool) {

@@ -78,16 +78,16 @@ func (fields Fields) longestTitle() (l int) {
 	return
 }
 
-func (fields Fields) toArr(l int) (arr []string, longest int) {
+func (fields Fields) toString(l int) (s string, longest int) {
 	sort.Sort(fields)
 	for _, f := range fields {
 		str := f.toString(l)
-		arr = append(arr, str)
+		s += str
 		if length := len(str); length > longest {
 			longest = length
 		}
 	}
-	return arr, longest
+	return s, longest
 }
 
 func (fields Fields) total() string {
@@ -112,22 +112,21 @@ func (fields Fields) Swap(i, j int) {
 }
 
 func BillReport(args []string) string {
-	bills, shares, header, total := parse(args)
-	longestTitle := longestTitleIn(bills, shares)
-	billsArr, longestBill := bills.toArr(longestTitle)
-	sharesArr, longestShare := shares.toArr(longestTitle)
+	bills, shares, longestTitle, header, total := parse(args)
+	billsStr, longestBill := bills.toString(longestTitle)
+	sharesStr, longestShare := shares.toString(longestTitle)
 	length := lineBreakLength([]int{len(header), longestBill, longestShare})
 	dottedLine := linebreak.Make("-", length, "green") + "\n"
 	return color.Text(header, "blue") + "\n" +
 		linebreak.Make("*", length, "green") + "\n" +
-		strings.Join(billsArr, "") +
+		billsStr +
 		dottedLine +
 		total.toString(longestTitle) +
 		dottedLine +
-		strings.Join(sharesArr, "")
+		sharesStr
 }
 
-func parse(args []string) (bills Fields, shares Fields, header string, total Field) {
+func parse(args []string) (bills Fields, shares Fields, longestTitle int, header string, total Field) {
 	isShare := false
 	for i, arg := range args {
 		if isPartOfHeader(arg, i, args) {
@@ -149,15 +148,7 @@ func parse(args []string) (bills Fields, shares Fields, header string, total Fie
 			}
 		}
 	}
-	return
-}
-
-func longestTitleIn(bills Fields, shares Fields) (l int) {
-	if shares.longestTitle() > bills.longestTitle() {
-		l = shares.longestTitle()
-	} else {
-		l = bills.longestTitle()
-	}
+	longestTitle = append(bills, shares...).longestTitle()
 	return
 }
 

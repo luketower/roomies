@@ -43,7 +43,7 @@ func ErrorMsg(args []string) string {
 
 type Field struct {
 	name    string
-	amount  string
+	amount  float64
 	isShare bool
 }
 
@@ -54,7 +54,7 @@ func (f *Field) toString(length int) (s string) {
 	} else {
 		s = name + ":"
 	}
-	return s + " $" + f.amount + "\n"
+	return s + " $" + strconv.FormatFloat(f.amount, 'f', 2, 64) + "\n"
 }
 
 func (f *Field) formatName() (s string) {
@@ -90,13 +90,11 @@ func (fields Fields) toString(l int) (s string, longest int) {
 	return s, longest
 }
 
-func (fields Fields) total() string {
-	var total float64
+func (fields Fields) total() (total float64) {
 	for _, f := range fields {
-		val := parseFloat(f.amount)
-		total += val
+		total += f.amount
 	}
-	return strconv.FormatFloat(total, 'f', 2, 64)
+	return
 }
 
 func (fields Fields) Len() int {
@@ -144,7 +142,7 @@ func parse(args []string) (bills, shares Fields, longestTitle int, header string
 					calcShare(args[i+1], total.amount), isShare})
 			} else {
 				bills = append(bills, Field{args[i-1],
-					calcShare("100", arg), isShare})
+					calcShare("100", parseFloat(arg)), isShare})
 			}
 		}
 	}
@@ -184,12 +182,11 @@ func isDate(s string) bool {
 	return s == "date" || s == "month"
 }
 
-func calcShare(percent string, total string) (calc string) {
-	s := parseFloat(total)
+func calcShare(percent string, total float64) float64 {
 	if percent != "100" {
-		s = s * (parseFloat(percent) / 100.00)
+		total = total * (parseFloat(percent) / 100.00)
 	}
-	return strconv.FormatFloat(s, 'f', 2, 64)
+	return total
 }
 
 func parseFloat(num string) (float float64) {

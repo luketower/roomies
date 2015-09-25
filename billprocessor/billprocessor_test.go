@@ -1,7 +1,6 @@
 package billprocessor
 
 import (
-	"os"
 	"testing"
 )
 
@@ -42,63 +41,44 @@ func TestHasValid(t *testing.T) {
 	}
 }
 
-func TestHeader(t *testing.T) {
-	args := []string{"date", "03/2015", "gas", "34.56",
+func TestMakeHeader(t *testing.T) {
+	dateArgs := []string{"date", "03/2015", "gas", "34.56",
 		"--", "bob", "55", "susan", "45"}
-	header := header(args)
-	expected := "March 2015"
-	if header != expected {
-		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", header, expected, args)
+	monthArgs := []string{"month", "03/2015", "gas", "34.56",
+		"--", "bob", "55", "susan", "45"}
+	customArgs := []string{"header", "03/2015", "gas", "34.56",
+		"--", "bob", "55", "susan", "45"}
+	dateHeader := makeHeader("03/2015", dateArgs, 1)
+	monthHeader := makeHeader("03/2015", monthArgs, 1)
+	customHeader := makeHeader("03/2015", customArgs, 1)
+	expectedDate := "March 2015"
+	expectedMonth := "March 2015"
+	expectedCustom := "03/2015"
+	if dateHeader != expectedDate {
+		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", dateHeader,
+			expectedDate, dateArgs)
+	}
+	if monthHeader != expectedMonth {
+		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", monthHeader,
+			expectedMonth, monthArgs)
+	}
+	if customHeader != expectedCustom {
+		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", customHeader,
+			expectedCustom, customArgs)
 	}
 }
 
-func TestBillsToMap(t *testing.T) {
-	os.Args = []string{"gobills", "date", "03/2015", "gas", "34.56",
-		"--", "bob", "55", "susan", "45"}
-	args := os.Args[1:]
-	b := map[string]string{}
-	billsToMap(args, b)
-	expected := map[string]string{"gas": "34.56"}
-
-	if b["gas"] != expected["gas"] {
-		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", b, expected, args)
-	}
-}
-
-func TestBillToString(t *testing.T) {
-	name, amount := "Gas", "45.67"
-	result := billToString(name, amount, 0)
-	//	result2 := billToString(name, amount, 5)
+func TestToString(t *testing.T) {
+	f := Field{"Gas", 45.67, false}
+	result := f.toString(0)
 	expected := "Gas: $45.67\n"
-	//	expected2 := "Gas:      $45.67\n"
 	compareStrings(result, expected, "billToString(name, amount, 0)", t)
-	//	compareStrings(result2, expected2, "billToString(name, amount, 5)", t)
-}
-
-func TestSharesToMap(t *testing.T) {
-	total := "1000"
-	args := []string{"date", "03/2015", "gas", "34.56",
-		"--", "bob", "45", "susan", "55"}
-	result := sharesToMap(args, total)
-	expected := "450.00"
-	if result["bob"] != expected {
-		t.Errorf("\nGot: %q\nExpected: %q\nargs: %q", result, expected, args)
-	}
 }
 
 func TestCalcShare(t *testing.T) {
-	result := calcShare("55", "1000")
-	expected := "550.00"
-	compareStrings(result, expected, "calcShare(\"55\", \"1000\"", t)
-}
-
-func TestSortedKeys(t *testing.T) {
-	result := sortedKeys(map[string]string{"bob": "50.00", "andy": "40.00",
-		"alfred": "67.00"})
-	expected := []string{"alfred", "andy", "bob"}
-	for i, name := range result {
-		if name != expected[i] {
-			t.Errorf("\nGot: %q\nExpected: %q", result, expected)
-		}
+	result := calcShare("55", 1000)
+	expected := 550.00
+	if result != expected {
+		t.Error("\nGot: %q\nExpected: %q", result, expected)
 	}
 }

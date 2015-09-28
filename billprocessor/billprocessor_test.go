@@ -1,6 +1,7 @@
 package billprocessor
 
 import (
+	"github.com/luketower/roomies/field"
 	"testing"
 )
 
@@ -69,8 +70,8 @@ func TestMakeHeader(t *testing.T) {
 }
 
 func TestToString(t *testing.T) {
-	f := Field{"Gas", 45.67, false}
-	result := f.toString(0)
+	f := field.Field{"Gas", 45.67, false}
+	result := f.ToString(0)
 	expected := "Gas: $45.67\n"
 	compareStrings(result, expected, "billToString(name, amount, 0)", t)
 }

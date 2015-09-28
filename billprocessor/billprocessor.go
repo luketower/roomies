@@ -2,6 +2,7 @@ package billprocessor
 
 import (
 	"github.com/luketower/roomies/color"
+	"github.com/luketower/roomies/field"
 	"github.com/luketower/roomies/linebreak"
 	"log"
 	"sort"
@@ -41,90 +42,22 @@ func ErrorMsg(args []string) string {
 		yellowLineBreak + "\n" + yellowLineBreak + "\n\n"
 }
 
-type Field struct {
-	name    string
-	amount  float64
-	isShare bool
-}
-
-func (f *Field) toString(length int) (s string) {
-	name := f.formatName()
-	if nameLength := len(name); nameLength < length {
-		s = name + ":" + strings.Repeat(" ", length-nameLength)
-	} else {
-		s = name + ":"
-	}
-	return s + " $" + strconv.FormatFloat(f.amount, 'f', 2, 64) + "\n"
-}
-
-func (f *Field) formatName() (s string) {
-	s = strings.Title(f.name)
-	if f.isShare {
-		arr := strings.Split(s, " ")
-		first, rest := arr[0]+"'s", arr[1:]
-		s = strings.Join(append([]string{first}, rest...), " ")
-	}
-	return strings.Replace(s, "-", " ", -1)
-}
-
-type Fields []Field
-
-func (fields Fields) longestTitle() (l int) {
-	for _, b := range fields {
-		if length := len(b.formatName()); length > l {
-			l = length
-		}
-	}
-	return
-}
-
-func (fields Fields) toString(l int) (s string, longest int) {
-	sort.Sort(fields)
-	for _, f := range fields {
-		str := f.toString(l)
-		s += str
-		if length := len(str); length > longest {
-			longest = length
-		}
-	}
-	return s, longest
-}
-
-func (fields Fields) total() (total float64) {
-	for _, f := range fields {
-		total += f.amount
-	}
-	return
-}
-
-func (fields Fields) Len() int {
-	return len(fields)
-}
-
-func (fields Fields) Less(i, j int) bool {
-	return fields[i].name < fields[j].name
-}
-
-func (fields Fields) Swap(i, j int) {
-	fields[i], fields[j] = fields[j], fields[i]
-}
-
 func BillReport(args []string) string {
 	bills, shares, longestTitle, header, total := parse(args)
-	billsStr, longestBill := bills.toString(longestTitle)
-	sharesStr, longestShare := shares.toString(longestTitle)
+	billsStr, longestBill := bills.ToString(longestTitle)
+	sharesStr, longestShare := shares.ToString(longestTitle)
 	length := lineBreakLength([]int{len(header), longestBill, longestShare})
 	dottedLine := linebreak.Make("-", length, "green") + "\n"
 	return color.Text(header, "blue") + "\n" +
 		linebreak.Make("*", length, "green") + "\n" +
 		billsStr +
 		dottedLine +
-		total.toString(longestTitle) +
+		total.ToString(longestTitle) +
 		dottedLine +
 		sharesStr
 }
 
-func parse(args []string) (bills, shares Fields, longestTitle int, header string, total Field) {
+func parse(args []string) (bills, shares field.Fields, longestTitle int, header string, total field.Field) {
 	isShare := false
 	for i, arg := range args {
 		if isPartOfHeader(arg, i, args) {
@@ -132,21 +65,20 @@ func parse(args []string) (bills, shares Fields, longestTitle int, header string
 			continue
 		}
 		if arg == "--" {
-			isShare = true
-			total = Field{"Total", bills.total(), false}
+			isShare, total = true, field.Field{"Total", bills.Total(), false}
 			continue
 		}
 		if i%2 != 0 {
 			if isShare {
-				shares = append(shares, Field{arg + " Total",
-					calcShare(args[i+1], total.amount), isShare})
+				shares = append(shares, field.Field{arg + " Total",
+					calcShare(args[i+1], total.Amount), isShare})
 			} else {
-				bills = append(bills, Field{args[i-1],
+				bills = append(bills, field.Field{args[i-1],
 					calcShare("100", parseFloat(arg)), isShare})
 			}
 		}
 	}
-	longestTitle = append(bills, shares...).longestTitle()
+	longestTitle = append(bills, shares...).LongestTitle()
 	return
 }
 

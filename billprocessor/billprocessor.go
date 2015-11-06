@@ -43,21 +43,20 @@ func ErrorMsg(args []string) string {
 }
 
 func BillReport(args []string) string {
-	bills, shares, longestTitle, header, total := parse(args)
-	billsStr, longestBill := bills.ToString(longestTitle)
-	sharesStr, longestShare := shares.ToString(longestTitle)
-	length := lineBreakLength([]int{len(header), longestBill, longestShare})
-	dottedLine := linebreak.Make("-", length, "green") + "\n"
+	bills, shares, header, total := parse(args)
+	longestName := append(bills, shares...).LongestName()
+	l := lineBreakLength([]int{len(header), longestName + 15})
+	dottedLine := linebreak.Make("-", l, "green") + "\n"
 	return color.Text(header, "blue") + "\n" +
-		linebreak.Make("*", length, "green") + "\n" +
-		billsStr +
+		linebreak.Make("*", l, "green") + "\n" +
+		bills.ToString(longestName) +
 		dottedLine +
-		total.ToString(longestTitle) +
+		total.ToString(longestName) +
 		dottedLine +
-		sharesStr
+		shares.ToString(longestName)
 }
 
-func parse(args []string) (bills, shares f.Fields, longestTitle int, header string, total f.Field) {
+func parse(args []string) (bills, shares f.Fields, header string, total f.Field) {
 	isShare := false
 	for i, arg := range args {
 		if isPartOfHeader(arg, i, args) {
@@ -65,7 +64,8 @@ func parse(args []string) (bills, shares f.Fields, longestTitle int, header stri
 			continue
 		}
 		if arg == "--" {
-			isShare, total = true, f.Field{"Total", bills.Total(), false}
+			isShare = true
+			total = f.Field{"Total", bills.Total(), false}
 			continue
 		}
 		if i%2 != 0 {
@@ -78,17 +78,13 @@ func parse(args []string) (bills, shares f.Fields, longestTitle int, header stri
 			}
 		}
 	}
-	longestTitle = append(bills, shares...).LongestTitle()
 	return
 }
 
-func lineBreakLength(lengths []int) (l int) {
+func lineBreakLength(lengths []int) int {
+	lengths = append(lengths, DEFAULT_LINE_BREAK_LENGTH)
 	sort.Ints(lengths)
-	l, highest := DEFAULT_LINE_BREAK_LENGTH, lengths[len(lengths)-1]
-	if highest > l {
-		l = highest
-	}
-	return
+	return lengths[len(lengths)-1]
 }
 
 func makeHeader(word string, args []string, i int) (header string) {

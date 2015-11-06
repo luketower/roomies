@@ -34,7 +34,7 @@ func (f *Field) formatName() (s string) {
 
 type Fields []Field
 
-func (fields Fields) LongestTitle() (l int) {
+func (fields Fields) LongestName() (l int) {
 	for _, b := range fields {
 		if length := len(b.formatName()); length > l {
 			l = length
@@ -43,16 +43,12 @@ func (fields Fields) LongestTitle() (l int) {
 	return
 }
 
-func (fields Fields) ToString(l int) (s string, longest int) {
+func (fields Fields) ToString(l int) (s string) {
 	sort.Sort(fields)
 	for _, f := range fields {
-		str := f.ToString(l)
-		s += str
-		if length := len(str); length > longest {
-			longest = length
-		}
+		s += f.ToString(l)
 	}
-	return s, longest
+	return
 }
 
 func (fields Fields) Total() (total float64) {

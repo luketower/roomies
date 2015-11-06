@@ -74,7 +74,7 @@ func parse(args []string) (bills, shares f.Fields, longestTitle int, header stri
 					calcShare(args[i+1], total.Amount), isShare})
 			} else {
 				bills = append(bills, f.Field{args[i-1],
-					calcShare("100", parseFloat(arg)), isShare})
+					parseFloat(arg), isShare})
 			}
 		}
 	}
@@ -115,10 +115,7 @@ func isDate(s string) bool {
 }
 
 func calcShare(percent string, total float64) float64 {
-	if percent != "100" {
-		total = total * (parseFloat(percent) / 100.00)
-	}
-	return total
+	return total * (parseFloat(percent) / 100.00)
 }
 
 func parseFloat(num string) (float float64) {

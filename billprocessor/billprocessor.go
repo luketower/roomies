@@ -2,7 +2,7 @@ package billprocessor
 
 import (
 	"github.com/luketower/roomies/color"
-	"github.com/luketower/roomies/field"
+	f "github.com/luketower/roomies/field"
 	"github.com/luketower/roomies/linebreak"
 	"log"
 	"sort"
@@ -57,7 +57,7 @@ func BillReport(args []string) string {
 		sharesStr
 }
 
-func parse(args []string) (bills, shares field.Fields, longestTitle int, header string, total field.Field) {
+func parse(args []string) (bills, shares f.Fields, longestTitle int, header string, total f.Field) {
 	isShare := false
 	for i, arg := range args {
 		if isPartOfHeader(arg, i, args) {
@@ -65,15 +65,15 @@ func parse(args []string) (bills, shares field.Fields, longestTitle int, header 
 			continue
 		}
 		if arg == "--" {
-			isShare, total = true, field.Field{"Total", bills.Total(), false}
+			isShare, total = true, f.Field{"Total", bills.Total(), false}
 			continue
 		}
 		if i%2 != 0 {
 			if isShare {
-				shares = append(shares, field.Field{arg + " Total",
+				shares = append(shares, f.Field{arg + " Total",
 					calcShare(args[i+1], total.Amount), isShare})
 			} else {
-				bills = append(bills, field.Field{args[i-1],
+				bills = append(bills, f.Field{args[i-1],
 					calcShare("100", parseFloat(arg)), isShare})
 			}
 		}

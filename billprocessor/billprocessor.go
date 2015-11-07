@@ -12,6 +12,7 @@ import (
 
 var (
 	DEFAULT_LINE_BREAK_LENGTH = 25
+	MAX_AMOUNT_LENGTH         = 15
 	MONTHS                    = map[string]string{
 		"01": "January",
 		"02": "February",
@@ -45,7 +46,7 @@ func ErrorMsg(args []string) string {
 func BillReport(args []string) string {
 	bills, shares, header, total := parse(args)
 	longestName := append(bills, shares...).LongestName()
-	l := lineBreakLength([]int{len(header), longestName + 15})
+	l := lineBreakLength([]int{len(header), longestName + MAX_AMOUNT_LENGTH})
 	dottedLine := linebreak.Make("-", l, "green") + "\n"
 	return color.Text(header, "blue") + "\n" +
 		linebreak.Make("*", l, "green") + "\n" +
@@ -114,8 +115,8 @@ func calcShare(percent string, total float64) float64 {
 	return total * (parseFloat(percent) / 100.00)
 }
 
-func parseFloat(num string) (float float64) {
-	float, err := strconv.ParseFloat(num, 64)
+func parseFloat(num string) (f float64) {
+	f, err := strconv.ParseFloat(num, 64)
 	if err != nil {
 		log.Fatal("OUCH! ", err)
 	}

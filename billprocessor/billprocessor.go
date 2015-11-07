@@ -27,6 +27,10 @@ var (
 		"11": "November",
 		"12": "December",
 	}
+	EXAMPLE_USAGE = "  'date 12/2015 gas 34.55 electric 45.99 rent 933 -- bob 45 susan 55'\n\n" +
+		"* You must include the date!\n" +
+		"* You must add '--' followed by name/percentage pairs.\n" +
+		"  Ex. '(args) -- bob 45 susan 55'\n\n"
 )
 
 func ErrorMsg(args []string) string {
@@ -36,10 +40,7 @@ func ErrorMsg(args []string) string {
 		color.Text("There was a problem with your inputs:\n\n", "red") +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
 		color.Text("Input should resemble the following:\n\n", "red") +
-		"  'date 12/2015 gas 34.55 electric 45.99 rent 933 -- bob 45 susan 55'\n\n" +
-		"* You must include the date!\n" +
-		"* You must add '--' followed by name/percentage pairs.\n" +
-		"  Ex. '(args) -- bob 45 susan 55'\n\n" +
+		EXAMPLE_USAGE +
 		yellowLineBreak + "\n" + yellowLineBreak + "\n\n"
 }
 

@@ -70,7 +70,7 @@ func TestMakeHeader(t *testing.T) {
 }
 
 func TestToString(t *testing.T) {
-	f := field.Field{"Gas", 45.67, false}
+	f := field.Field{"Gas", 4567, false}
 	result := f.ToString(0)
 	expected := "Gas: $45.67\n"
 	compareStrings(result, expected, "billToString(name, amount, 0)", t)
@@ -78,7 +78,7 @@ func TestToString(t *testing.T) {
 
 func TestCalcShare(t *testing.T) {
 	result := calcShare("55", 1000)
-	expected := 550.00
+	expected := 550
 	if result != expected {
 		t.Error("\nGot: %q\nExpected: %q", result, expected)
 	}

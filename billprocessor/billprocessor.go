@@ -5,6 +5,7 @@ import (
 	f "github.com/luketower/roomies/field"
 	"github.com/luketower/roomies/linebreak"
 	"log"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -113,7 +114,28 @@ func isDate(s string) bool {
 }
 
 func calcShare(percent string, total int) int {
-	return total * (parseInt(percent) / 100)
+	floatTotal := float64(total) / 100.00
+	floatPercent, err := strconv.ParseFloat(percent, 64)
+	if err != nil {
+		log.Fatal("OUCH! ", err)
+	}
+	floatShare := round((floatTotal * (floatPercent / 100.00)), .5, 2)
+	return int(floatShare * 100)
+}
+
+// round func taken from http://play.golang.org/p/yjfShH_uEy
+func round(val float64, roundOn float64, places int) (newVal float64) {
+	var round float64
+	pow := math.Pow(10, float64(places))
+	digit := pow * val
+	_, div := math.Modf(digit)
+	if div >= roundOn {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	newVal = round / pow
+	return
 }
 
 func parseInt(num string) (i int) {

@@ -19,7 +19,16 @@ func (f *Field) ToString(length int) (s string) {
 	} else {
 		s = name + ":"
 	}
-	return s + " $" + strconv.Itoa(f.Amount) + "\n"
+	return s + " $" + f.stringifyAmount() + "\n"
+}
+
+func (f *Field) stringifyAmount() string {
+	dollars := strconv.Itoa(f.Amount / 100)
+	cents := strconv.Itoa(f.Amount % 100)
+	if len(cents) == 1 {
+		cents = "0" + cents
+	}
+	return dollars + "." + cents
 }
 
 func (f *Field) formatName() (s string) {

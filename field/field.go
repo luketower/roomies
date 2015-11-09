@@ -8,7 +8,7 @@ import (
 
 type Field struct {
 	Name    string
-	Amount  float64
+	Amount  int
 	IsShare bool
 }
 
@@ -19,7 +19,7 @@ func (f *Field) ToString(length int) (s string) {
 	} else {
 		s = name + ":"
 	}
-	return s + " $" + strconv.FormatFloat(f.Amount, 'f', 2, 64) + "\n"
+	return s + " $" + strconv.Itoa(f.Amount) + "\n"
 }
 
 func (f *Field) formatName() (s string) {
@@ -51,7 +51,7 @@ func (fields Fields) ToString(l int) (s string) {
 	return
 }
 
-func (fields Fields) Total() (total float64) {
+func (fields Fields) Total() (total int) {
 	for _, f := range fields {
 		total += f.Amount
 	}

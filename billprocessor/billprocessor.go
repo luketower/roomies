@@ -76,7 +76,7 @@ func parse(args []string) (bills, shares f.Fields, header string, total f.Field)
 					calcShare(args[i+1], total.Amount), isShare})
 			} else {
 				bills = append(bills, f.Field{args[i-1],
-					parseFloat(arg), isShare})
+					parseInt(arg), isShare})
 			}
 		}
 	}
@@ -112,12 +112,17 @@ func isDate(s string) bool {
 	return s == "date" || s == "month"
 }
 
-func calcShare(percent string, total float64) float64 {
-	return total * (parseFloat(percent) / 100.00)
+func calcShare(percent string, total int) int {
+	return total * (parseInt(percent) / 100)
 }
 
-func parseFloat(num string) (f float64) {
-	f, err := strconv.ParseFloat(num, 64)
+func parseInt(num string) (i int) {
+	if strings.Contains(num, ".") {
+		num = strings.Join(strings.Split(num, "."), "")
+	} else {
+		num += "00"
+	}
+	i, err := strconv.Atoi(num)
 	if err != nil {
 		log.Fatal("OUCH! ", err)
 	}

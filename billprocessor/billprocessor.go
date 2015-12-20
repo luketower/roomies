@@ -3,7 +3,7 @@ package billprocessor
 import (
 	"github.com/luketower/roomies/color"
 	f "github.com/luketower/roomies/field"
-	"github.com/luketower/roomies/linebreak"
+	line "github.com/luketower/roomies/linebreak"
 	"log"
 	"sort"
 	"strconv"
@@ -34,48 +34,78 @@ var (
 )
 
 func ErrorMsg(args []string) string {
-	yellowLineBreak := linebreak.Make("*", 70, "yellow")
+	yellowLine := line.Make("*", 70, "yellow")
+	yellowLines := yellowLine + "\n" + yellowLine + "\n\n"
 	return "\n" +
-		yellowLineBreak + "\n" + yellowLineBreak + "\n\n" +
+		yellowLines +
 		color.Text("There was a problem with your inputs:\n\n", "red") +
 		"  '" + strings.Join(args, " ") + "'\n\n" +
 		color.Text("Input should resemble the following:\n\n", "red") +
 		EXAMPLE_USAGE +
-		yellowLineBreak + "\n" + yellowLineBreak + "\n\n"
+		yellowLines
 }
 
 func BillReport(args []string) string {
-	bills, shares, header, total := parse(args)
-	longestName := append(bills, shares...).LongestName()
-	l := lineBreakLength([]int{len(header), longestName + MAX_AMOUNT_LENGTH})
-	dottedLine := linebreak.Make("-", l, "green") + "\n"
-	return color.Text(header, "blue") + "\n" +
-		linebreak.Make("*", l, "green") + "\n" +
-		bills.ToString(longestName) +
+	data := parse(args)
+	dottedLine := line.Make("-", data.getLineBreakLength(), "green") + "\n"
+	return color.Text(data.header, "blue") + "\n" +
+		line.Make("*", data.getLineBreakLength(), "green") + "\n" +
+		data.bills.ToString(data.longestName()) +
 		dottedLine +
-		total.ToString(longestName) +
+		data.total.ToString(data.longestName()) +
 		dottedLine +
-		shares.ToString(longestName)
+		data.shares.ToString(data.longestName())
 }
 
-func parse(args []string) (bills, shares f.Fields, header string, total f.Field) {
+type argsData struct {
+	bills             f.Fields
+	shares            f.Fields
+	header            string
+	total             f.Field
+	longestNameLength int
+	lineBreakLength   int
+}
+
+func (d *argsData) longestName() (l int) {
+	if d.longestNameLength > 0 {
+		l = d.longestNameLength
+	} else {
+		l = append(d.bills, d.shares...).LongestName()
+	}
+	return
+}
+
+func (d *argsData) getLineBreakLength() (l int) {
+	if d.lineBreakLength > 0 {
+		l = d.lineBreakLength
+	} else {
+		lengths := []int{len(d.header),
+			d.longestName() + MAX_AMOUNT_LENGTH,
+			DEFAULT_LINE_BREAK_LENGTH}
+		sort.Ints(lengths)
+		l = lengths[len(lengths)-1]
+	}
+	return
+}
+
+func parse(args []string) (d argsData) {
 	isShare := false
 	for i, arg := range args {
 		if isPartOfHeader(arg, i, args) {
-			header = makeHeader(arg, args, i)
+			d.header = makeHeader(arg, args, i)
 			continue
 		}
 		if arg == "--" {
 			isShare = true
-			total = f.Field{"Total", bills.Total(), false}
+			d.total = f.Field{"Total", d.bills.Total(), false}
 			continue
 		}
 		if i%2 != 0 {
 			if isShare {
-				shares = append(shares, f.Field{arg + " Total",
-					calcShare(args[i+1], total.Amount), isShare})
+				d.shares = append(d.shares, f.Field{arg + " Total",
+					calcShare(args[i+1], d.total.Amount), isShare})
 			} else {
-				bills = append(bills, f.Field{args[i-1],
+				d.bills = append(d.bills, f.Field{args[i-1],
 					parseFloat(arg), isShare})
 			}
 		}
@@ -83,29 +113,23 @@ func parse(args []string) (bills, shares f.Fields, header string, total f.Field)
 	return
 }
 
-func lineBreakLength(lengths []int) int {
-	lengths = append(lengths, DEFAULT_LINE_BREAK_LENGTH)
-	sort.Ints(lengths)
-	return lengths[len(lengths)-1]
-}
-
 func makeHeader(word string, args []string, i int) (header string) {
 	if strings.Contains(word, "/") && isDate(args[i-1]) {
-		dateArr := strings.Split(word, "/")
-		header = MONTHS[dateArr[0]] + " " + dateArr[1]
+		monthAndYear := strings.Split(word, "/")
+		header = MONTHS[monthAndYear[0]] + " " + monthAndYear[1]
 	} else {
 		header = strings.Title(strings.Replace(word, "-", " ", -1))
 	}
-
 	return
 }
 
 func isPartOfHeader(s string, i int, args []string) (ans bool) {
-	ans = hasHeader(s)
 	if i > 0 {
 		ans = hasHeader(args[i-1])
+	} else {
+		ans = hasHeader(s)
 	}
-	return ans
+	return
 }
 
 func isDate(s string) bool {

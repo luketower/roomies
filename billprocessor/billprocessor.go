@@ -52,13 +52,11 @@ type argsData struct {
 	lineBreakLength   int
 }
 
-func (d *argsData) longestName() (l int) {
-	if d.longestNameLength > 0 {
-		l = d.longestNameLength
-	} else {
-		l = append(d.bills, d.shares...).LongestName()
+func (d *argsData) longestName() int {
+	if d.longestNameLength == 0 {
+		d.longestNameLength = append(d.bills, d.shares...).LongestName()
 	}
-	return
+	return d.longestNameLength
 }
 
 func (d *argsData) getLineBreakLength() (l int) {
@@ -99,11 +97,16 @@ func parse(args []string) (d argsData) {
 	return
 }
 
+func toHeader(word string) string {
+	arr := strings.Split(word, "/")
+	month := time.Month(parseInt(arr[0])).String()
+	year := arr[1]
+	return month + " " + year
+}
+
 func makeHeader(word string, args []string, i int) (header string) {
 	if strings.Contains(word, "/") && isDate(args[i-1]) {
-		monthAndYear := strings.Split(word, "/")
-		monthInt := parseInt(monthAndYear[0])
-		header = time.Month(monthInt).String() + " " + monthAndYear[1]
+		header = toHeader(word)
 	} else {
 		header = strings.Title(strings.Replace(word, "-", " ", -1))
 	}

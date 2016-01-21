@@ -43,7 +43,11 @@ func readFile(scanner *bufio.Scanner) {
 		if isCommentOrBlankLine(args) {
 			continue
 		}
-		fmt.Println(processor.BillReport(args))
+		if processor.HasValid(args) {
+			fmt.Println(processor.BillReport(args))
+		} else {
+			fmt.Println(processor.ErrorMsg(args))
+		}
 	}
 }
 

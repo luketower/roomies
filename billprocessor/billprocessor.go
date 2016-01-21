@@ -31,16 +31,20 @@ func ErrorMsg(args []string) string {
 		yellowLines
 }
 
-func BillReport(args []string) string {
+func BillReport(args []string) (report string) {
 	data := parse(args)
 	dottedLine := line.Make("-", data.getLineBreakLength(), "green") + "\n"
-	return color.Text(data.header, "blue") + "\n" +
+	report = color.Text(data.header, "blue") + "\n" +
 		line.Make("*", data.getLineBreakLength(), "green") + "\n" +
 		data.bills.ToString(data.longestName()) +
 		dottedLine +
-		data.total.ToString(data.longestName()) +
-		dottedLine +
-		data.shares.ToString(data.longestName())
+		data.total.ToString(data.longestName())
+	if data.needToShowShares() {
+		report = report +
+			dottedLine +
+			data.shares.ToString(data.longestName())
+	}
+	return
 }
 
 type argsData struct {
@@ -50,6 +54,10 @@ type argsData struct {
 	total             f.Field
 	longestNameLength int
 	lineBreakLength   int
+}
+
+func (d *argsData) needToShowShares() bool {
+	return !(len(d.shares) == 1 && d.shares[0].Amount == d.total.Amount)
 }
 
 func (d *argsData) longestName() int {

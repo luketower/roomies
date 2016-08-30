@@ -39,7 +39,7 @@ func Read(args []string) {
 
 func readFile(scanner *bufio.Scanner) {
 	for scanner.Scan() {
-		args := strings.Split(scanner.Text(), " ")
+		args := strings.Split(strings.TrimSpace(scanner.Text()), " ")
 		if isCommentOrBlankLine(args) {
 			continue
 		}

@@ -6,27 +6,27 @@ roomies
 ### Usage
 There are two ways to run the program.
 
-  1. For one month at a time:
+1. For one month at a time: 
+```
+roomies month 06/2015 gas 45.34 electric 47.35 rent 1200 -- bob 25 susan 25 steve 25 alice 25
+```
+The output will look something like this:
+   
+    June 2015
+    *************************
+    Electric:      $47.35
+    Gas:           $45.34
+    Rent:          $1200.00
+    -------------------------
+    Total:         $1292.69
+    -------------------------
+    Alice's Total: $323.17
+    Bob's Total:   $323.17
+    Steve's Total: $323.17
+    Susan's Total: $323.17
 
-        roomies month 06/2015 gas 45.34 electric 47.35 rent 1200 -- bob 25 susan 25 steve 25 alice 25
-
-     The output will look something like this:
-
-        June 2015
-        *************************
-        Electric:      $47.35
-        Gas:           $45.34
-        Rent:          $1200.00
-        -------------------------
-        Total:         $1292.69
-        -------------------------
-        Alice's Total: $323.17
-        Bob's Total:   $323.17
-        Steve's Total: $323.17
-        Susan's Total: $323.17
-
-  2. Read in a file of multiple months: `roomies path/to/file.txt`
-
+2. Read in a file of multiple months: `roomies path/to/file.txt`
+        
         // file.txt
 
         month 01/2015 gas 45.34 electric 47.35 rent 1200 -- bob 25 susan 25 steve 25 alice 25
